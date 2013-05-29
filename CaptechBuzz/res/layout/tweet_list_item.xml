@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" 
+    android:descendantFocusability="blocksDescendants">
+    
+    <com.android.volley.toolbox.NetworkImageView
+        android:id="@+id/twitterUserImage"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:padding="5dp"
+        />
+    
+    <TextView 
+        android:id="@+id/usernameTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textIsSelectable="false"
+        android:layout_toRightOf="@id/twitterUserImage"
+        android:textStyle="bold"
+        android:paddingTop="5dp"
+        android:textColor="@color/black"
+        android:layout_alignParentTop="true"/>
+    
+    <TextView 
+        android:id="@+id/tweetTimeTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textIsSelectable="false"
+        android:layout_alignParentRight="true"
+        android:textStyle="bold"
+        android:paddingTop="5dp"
+        android:paddingRight="5dp"
+        android:layout_alignParentTop="true"/>
+    
+    <TextView 
+        android:id="@+id/messageTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textIsSelectable="false"
+        android:paddingBottom="10dp"
+        android:paddingRight="5dp"
+        android:textColor="@color/black"
+        android:autoLink="web"
+        android:layout_toRightOf="@id/twitterUserImage"
+        android:layout_below="@id/usernameTextView"/>
+    
+</RelativeLayout>
