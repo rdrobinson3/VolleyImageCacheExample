@@ -35,7 +35,7 @@ public class MainApplication extends Application {
 	}
 	
 	/**
-	 * Create the image cache. 
+	 * Create the image cache. Uses Memory Cache by default. Change to Disk for a Disk based LRU implementation.  
 	 */
 	private void createImageCache(){
 		ImageCacheManager.getInstance().init(this,
