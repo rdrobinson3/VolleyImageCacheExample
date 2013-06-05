@@ -2,12 +2,13 @@ package com.captechconsulting.captechbuzz;
 
 import com.captechconsulting.captechbuzz.model.RequestManager;
 import com.captechconsulting.captechbuzz.model.images.ImageCacheManager;
+import com.captechconsulting.captechbuzz.model.images.ImageCacheManager.CacheType;
 
 import android.app.Application;
 import android.graphics.Bitmap.CompressFormat;
 
 /**
- * Example application for adding an image cache to Volley. 
+ * Example application for adding an L1 image cache to Volley. 
  * 
  * @author Trey Robinson
  *
@@ -41,6 +42,7 @@ public class MainApplication extends Application {
 				this.getPackageCodePath()
 				, DISK_IMAGECACHE_SIZE
 				, DISK_IMAGECACHE_COMPRESS_FORMAT
-				, DISK_IMAGECACHE_QUALITY);
+				, DISK_IMAGECACHE_QUALITY
+				, CacheType.MEMORY);
 	}
 }

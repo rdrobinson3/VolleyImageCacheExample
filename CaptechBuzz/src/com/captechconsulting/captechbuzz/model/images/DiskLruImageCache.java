@@ -14,6 +14,7 @@ import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 
+import com.android.volley.toolbox.ImageLoader.ImageCache;
 import com.captechconsulting.captechbuzz.BuildConfig;
 import com.jakewharton.disklrucache.DiskLruCache;
 
@@ -21,7 +22,7 @@ import com.jakewharton.disklrucache.DiskLruCache;
  * Implementation of DiskLruCache by Jake Wharton
  * modified from http://stackoverflow.com/questions/10185898/using-disklrucache-in-android-4-0-does-not-provide-for-opencache-method
  */
-public class DiskLruImageCache  {
+public class DiskLruImageCache implements ImageCache  {
 
     private DiskLruCache mDiskCache;
     private CompressFormat mCompressFormat = CompressFormat.JPEG;
@@ -61,7 +62,8 @@ public class DiskLruImageCache  {
         return new File(cachePath + File.separator + uniqueName);
     }
 
-    public void put( String key, Bitmap data ) {
+    @Override
+    public void putBitmap( String key, Bitmap data ) {
 
         DiskLruCache.Editor editor = null;
         try {
@@ -96,6 +98,7 @@ public class DiskLruImageCache  {
 
     }
 
+    @Override
     public Bitmap getBitmap( String key ) {
 
         Bitmap bitmap = null;
@@ -161,5 +164,9 @@ public class DiskLruImageCache  {
     public File getCacheFolder() {
         return mDiskCache.getDirectory();
     }
+
+
+    
+    
 
 }
