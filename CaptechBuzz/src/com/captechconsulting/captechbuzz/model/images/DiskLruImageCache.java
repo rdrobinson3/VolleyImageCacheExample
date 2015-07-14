@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import android.util.LruCache;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -22,7 +23,7 @@ import com.jakewharton.disklrucache.DiskLruCache;
  * Implementation of DiskLruCache by Jake Wharton
  * modified from http://stackoverflow.com/questions/10185898/using-disklrucache-in-android-4-0-does-not-provide-for-opencache-method
  */
-public class DiskLruImageCache implements ImageCache  {
+public class DiskLruImageCache extends LruCache<String, Bitmap> implements ImageCache  {
 
     private DiskLruCache mDiskCache;
     private CompressFormat mCompressFormat = CompressFormat.JPEG;
@@ -30,11 +31,13 @@ public class DiskLruImageCache implements ImageCache  {
     private int mCompressQuality = 70;
     private static final int APP_VERSION = 1;
     private static final int VALUE_COUNT = 1;
+    private Context mContext;
 
     public DiskLruImageCache(Context context,String uniqueName, int diskCacheSize,
         CompressFormat compressFormat, int quality ) {
         try {
                 final File diskCacheDir = getDiskCacheDir(context, uniqueName );
+                mContext = context;
                 mDiskCache = DiskLruCache.open( diskCacheDir, APP_VERSION, VALUE_COUNT, diskCacheSize );
                 mCompressFormat = compressFormat;
                 mCompressQuality = quality;
@@ -64,7 +67,7 @@ public class DiskLruImageCache implements ImageCache  {
 
     @Override
     public void putBitmap( String key, Bitmap data ) {
-
+        put(key, data); // Save on RAM
         DiskLruCache.Editor editor = null;
         try {
             editor = mDiskCache.edit( key );
@@ -100,35 +103,40 @@ public class DiskLruImageCache implements ImageCache  {
 
     @Override
     public Bitmap getBitmap( String key ) {
-
-        Bitmap bitmap = null;
-        DiskLruCache.Snapshot snapshot = null;
-        try {
-
-            snapshot = mDiskCache.get( key );
-            if ( snapshot == null ) {
-                return null;
+        if(mContext == null)
+            return null;
+        if(isInternetAvailable(mContext))
+            return get(key); // Access RAM when net is available
+        else {
+            // Otherwise, access the DISK
+            Bitmap bitmap = null;
+            DiskLruCache.Snapshot snapshot = null;
+            try {
+    
+                snapshot = mDiskCache.get( key );
+                if ( snapshot == null ) {
+                    return null;
+                }
+                final InputStream in = snapshot.getInputStream( 0 );
+                if ( in != null ) {
+                    final BufferedInputStream buffIn = 
+                    new BufferedInputStream( in, IO_BUFFER_SIZE );
+                    bitmap = BitmapFactory.decodeStream( buffIn );              
+                }   
+            } catch ( IOException e ) {
+                e.printStackTrace();
+            } finally {
+                if ( snapshot != null ) {
+                    snapshot.close();
+                }
             }
-            final InputStream in = snapshot.getInputStream( 0 );
-            if ( in != null ) {
-                final BufferedInputStream buffIn = 
-                new BufferedInputStream( in, IO_BUFFER_SIZE );
-                bitmap = BitmapFactory.decodeStream( buffIn );              
-            }   
-        } catch ( IOException e ) {
-            e.printStackTrace();
-        } finally {
-            if ( snapshot != null ) {
-                snapshot.close();
+    
+            if ( BuildConfig.DEBUG ) {
+                Log.d( "cache_test_DISK_", bitmap == null ? "" : "image read from disk " + key);
             }
+    
+            return bitmap;
         }
-
-        if ( BuildConfig.DEBUG ) {
-            Log.d( "cache_test_DISK_", bitmap == null ? "" : "image read from disk " + key);
-        }
-
-        return bitmap;
-
     }
 
     public boolean containsKey( String key ) {
@@ -165,7 +173,10 @@ public class DiskLruImageCache implements ImageCache  {
         return mDiskCache.getDirectory();
     }
 
-
+    public boolean isInternetAvailable(Context context) {
+        ConnectivityManager cm = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        return cm.getActiveNetworkInfo() != null ? cm.getActiveNetworkInfo().isConnectedOrConnecting() : false;
+    }
     
     
 
